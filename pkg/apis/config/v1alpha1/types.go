@@ -12,23 +12,23 @@ type EdgeMeshAgentConfig struct {
 	metav1.TypeMeta
 	// KubeAPIConfig indicates the kubernetes cluster info which EdgeMeshAgent will connect
 	// +Required
-	KubeAPIConfig *KubeAPIConfig `json:"kubeAPIConfig,omitempty"`
+	KubeAPIConfig *KubeAPIConfig `json:"kubeAPIConfig,omitempty" yaml:"kubeAPIConfig,omitempty"`
 	// CommonConfig indicates common config for all modules
 	// +Required
-	CommonConfig *CommonConfig `json:"commonConfig,omitempty"`
+	CommonConfig *CommonConfig `json:"commonConfig,omitempty" yaml:"commonConfig,omitempty"`
 	// Modules indicates EdgeMeshAgent modules config
 	// +Required
-	Modules *AgentModules `json:"modules,omitempty"`
+	Modules *AgentModules `json:"modules,omitempty" yaml:"modules,omitempty"`
 }
 
 // AgentModules indicates the modules of EdgeMeshAgent will be use
 type AgentModules struct {
 	// EdgeDNSConfig indicates EdgeDNS module config
-	EdgeDNSConfig *EdgeDNSConfig `json:"edgeDNS,omitempty"`
+	EdgeDNSConfig *EdgeDNSConfig `json:"edgeDNS,omitempty" yaml:"edgeDNS,omitempty"`
 	// EdgeProxyConfig indicates EdgeProxy module config
-	EdgeProxyConfig *EdgeProxyConfig `json:"edgeProxy,omitempty"`
+	EdgeProxyConfig *EdgeProxyConfig `json:"edgeProxy,omitempty" yaml:"edgeProxy,omitempty"`
 	// EdgeTunnelConfig indicates EdgeTunnel module config
-	EdgeTunnelConfig *EdgeTunnelConfig `json:"edgeTunnel,omitempty"`
+	EdgeTunnelConfig *EdgeTunnelConfig `json:"edgeTunnel,omitempty" yaml:"edgeTunnel,omitempty"`
 }
 
 // EdgeMeshGatewayConfig indicates the config of EdgeMeshGateway which get from EdgeMeshGateway config file
@@ -36,18 +36,18 @@ type EdgeMeshGatewayConfig struct {
 	metav1.TypeMeta
 	// KubeAPIConfig indicates the kubernetes cluster info which EdgeMeshGateway will connect
 	// +Required
-	KubeAPIConfig *KubeAPIConfig `json:"kubeAPIConfig,omitempty"`
+	KubeAPIConfig *KubeAPIConfig `json:"kubeAPIConfig,omitempty" yaml:"kubeAPIConfig,omitempty"`
 	// Modules indicates EdgeMeshAgent modules config
 	// +Required
-	Modules *GatewayModules `json:"modules,omitempty"`
+	Modules *GatewayModules `json:"modules,omitempty" yaml:"modules,omitempty"`
 }
 
 // GatewayModules indicates the modules of EdgeMeshGateway will be use
 type GatewayModules struct {
 	// EdgeGatewayConfig indicates EdgeGateway module config
-	EdgeGatewayConfig *EdgeGatewayConfig `json:"edgeGateway,omitempty"`
+	EdgeGatewayConfig *EdgeGatewayConfig `json:"edgeGateway,omitempty" yaml:"edgeGateway,omitempty"`
 	// EdgeTunnelConfig indicates EdgeTunnel module config
-	EdgeTunnelConfig *EdgeTunnelConfig `json:"edgeTunnel,omitempty"`
+	EdgeTunnelConfig *EdgeTunnelConfig `json:"edgeTunnel,omitempty" yaml:"edgeTunnel,omitempty"`
 }
 
 // KubeAPIConfig indicates the configuration for interacting with k8s server
@@ -58,7 +58,7 @@ type KubeAPIConfig struct {
 	// options ManualMode, CloudMode and EdgeMode
 	Mode defaults.RunningMode
 	// MetaServer indicates the config of EdgeCore's metaServer module
-	MetaServer *MetaServer `json:"metaServer,omitempty"`
+	MetaServer *MetaServer `json:"metaServer,omitempty" yaml:"metaServer,omitempty"`
 }
 
 // MetaServer indicates the config of EdgeCore's metaServer module
@@ -66,9 +66,9 @@ type MetaServer struct {
 	// Server indicates the address of metaServer
 	// default http://127.0.0.1:10550, when security is disabled
 	// default https://127.0.0.1:10550, when security is enabled
-	Server string `json:"server,omitempty"`
+	Server string `json:"server,omitempty" yaml:"server,omitempty"`
 	// Security indicates the metaServer security feature
-	Security *MetaServerSecurity `json:"security,omitempty"`
+	Security *MetaServerSecurity `json:"security,omitempty" yaml:"security,omitempty"`
 }
 
 // MetaServerSecurity indicates the metaServer security feature, KubeEdge >= 1.12.0 support
@@ -76,36 +76,36 @@ type MetaServer struct {
 type MetaServerSecurity struct {
 	// RequireAuthorization indicates whether enable metaServer security access
 	// default false
-	RequireAuthorization bool `json:"requireAuthorization,omitempty"`
+	RequireAuthorization bool `json:"requireAuthorization,omitempty" yaml:"requireAuthorization,omitempty"`
 	// InsecureSkipTLSVerify indicates whether enable insecure skip tls verify
 	// default false
-	InsecureSkipTLSVerify bool `json:"insecureSkipTLSVerify,omitempty"`
+	InsecureSkipTLSVerify bool `json:"insecureSkipTLSVerify,omitempty" yaml:"insecureSkipTLSVerify,omitempty"`
 	// TLSCaFile indicates the ca file
 	// default /etc/edgemesh/metaserver/rootCA.crt
-	TLSCaFile string `json:"tlsCaFile,omitempty"`
+	TLSCaFile string `json:"tlsCaFile,omitempty" yaml:"tlsCaFile,omitempty"`
 	// TLSCertFile indicates the cert file
 	// default /etc/edgemesh/metaserver/server.crt
-	TLSCertFile string `json:"tlsCertFile,omitempty"`
+	TLSCertFile string `json:"tlsCertFile,omitempty" yaml:"tlsCertFile,omitempty"`
 	// TLSPrivateKeyFile indicates the private key file
 	// default /etc/edgemesh/metaserver/server.key
-	TLSPrivateKeyFile string `json:"tlsPrivateKeyFile,omitempty"`
+	TLSPrivateKeyFile string `json:"tlsPrivateKeyFile,omitempty" yaml:"tlsPrivateKeyFile,omitempty"`
 }
 
 // CommonConfig defines some common configuration items
 type CommonConfig struct {
 	// BridgeDeviceName indicates the name of the bridge device will be created
 	// default edgemesh0
-	BridgeDeviceName string `json:"bridgeDeviceName,omitempty"`
+	BridgeDeviceName string `json:"bridgeDeviceName,omitempty" yaml:"bridgeDeviceName,omitempty"`
 	// BridgeDeviceIP indicates the IP bound to the bridge device
 	// default "169.254.96.16"
-	BridgeDeviceIP string `json:"bridgeDeviceIP,omitempty"`
+	BridgeDeviceIP string `json:"bridgeDeviceIP,omitempty" yaml:"bridgeDeviceIP,omitempty"`
 }
 
 // EdgeDNSConfig indicates the EdgeDNS config
 type EdgeDNSConfig struct {
 	// Enable indicates whether enable EdgeDNS
 	// default false
-	Enable bool `json:"enable,omitempty"`
+	Enable bool `json:"enable,omitempty" yaml:"enable,omitempty"`
 	// KubeAPIConfig is equivalent to EdgeMeshAgentConfig.KubeAPIConfig
 	// do not allow users to configure manually
 	KubeAPIConfig *KubeAPIConfig
@@ -114,52 +114,52 @@ type EdgeDNSConfig struct {
 	ListenInterface string
 	// ListenPort indicates the listen port of EdgeDNS
 	// default 53
-	ListenPort int `json:"listenPort,omitempty"`
+	ListenPort int `json:"listenPort,omitempty" yaml:"listenPort,omitempty"`
 	// CacheDNS indicates the node local cache dns
-	CacheDNS *CacheDNS `json:"cacheDNS,omitempty"`
+	CacheDNS *CacheDNS `json:"cacheDNS,omitempty" yaml:"cacheDNS,omitempty"`
 }
 
 type CacheDNS struct {
 	// Enable indicates whether enable node local cache dns
 	// default false
-	Enable bool `json:"enable,omitempty"`
+	Enable bool `json:"enable,omitempty" yaml:"enable,omitempty"`
 	// AutoDetect indicates whether to automatically detect the
 	// address of the upstream clusterDNS
 	// default true
-	AutoDetect bool `json:"autoDetect,omitempty"`
+	AutoDetect bool `json:"autoDetect,omitempty" yaml:"autoDetect,omitempty"`
 	// UpstreamServers indicates the upstream ClusterDNS addresses
-	UpstreamServers []string `json:"upstreamServers,omitempty"`
+	UpstreamServers []string `json:"upstreamServers,omitempty" yaml:"upstreamServers,omitempty"`
 	// CacheTTL indicates the time to live of a dns cache entry
 	// default 30(second)
-	CacheTTL int `json:"cacheTTL,omitempty"`
+	CacheTTL int `json:"cacheTTL,omitempty" yaml:"cacheTTL,omitempty"`
 }
 
 // EdgeProxyConfig indicates the EdgeProxy config
 type EdgeProxyConfig struct {
 	// Enable indicates whether enable EdgeProxy
 	// default false
-	Enable bool `json:"enable,omitempty"`
+	Enable bool `json:"enable,omitempty" yaml:"enable,omitempty"`
 	// ListenInterface indicates the listen interface of EdgeProxy
 	// do not allow users to configure manually
 	ListenInterface string
 	// Socks5Proxy indicates the socks5 proxy config
-	Socks5Proxy *Socks5Proxy `json:"socks5Proxy,omitempty"`
+	Socks5Proxy *Socks5Proxy `json:"socks5Proxy,omitempty" yaml:"socks5Proxy,omitempty"`
 	// LoadBalancer indicates the load balance strategy
-	LoadBalancer *LoadBalancer `json:"loadBalancer,omitempty"`
+	LoadBalancer *LoadBalancer `json:"loadBalancer,omitempty" yaml:"loadBalancer,omitempty"`
 	// ServiceFilterMode indicates the service filter mode
 	// Allowed values are: "FilterIfLabelExists", "FilterIfLabelDoesNotExists"
 	// default "FilterIfLabelExists"
-	ServiceFilterMode defaults.ServiceFilterMode `json:"serviceFilterMode,omitempty"`
+	ServiceFilterMode defaults.ServiceFilterMode `json:"serviceFilterMode,omitempty" yaml:"serviceFilterMode,omitempty"`
 }
 
 // Socks5Proxy indicates the socks5 proxy config
 type Socks5Proxy struct {
 	// Enable indicates whether enable socks5 proxy server
 	// default false
-	Enable bool `json:"enable,omitempty"`
+	Enable bool `json:"enable,omitempty" yaml:"enable,omitempty"`
 	// ListenPort indicates the listen port of Socks5Proxy
 	// default 10800
-	ListenPort int `json:"listenPort,omitempty"`
+	ListenPort int `json:"listenPort,omitempty" yaml:"listenPort,omitempty"`
 	// NodeName indicates name of host
 	// do not allow users to configure manually
 	NodeName string
@@ -172,24 +172,24 @@ type Socks5Proxy struct {
 type EdgeGatewayConfig struct {
 	// Enable indicates whether enable edge gateway
 	// default false
-	Enable bool `json:"enable,omitempty"`
+	Enable bool `json:"enable,omitempty" yaml:"enable,omitempty"`
 	// NIC indicates the network interface controller that the edge gateway needs to listen to.
 	// empty or "*" stands for all netcards. You can also specify network adapters such as "lo,eth0"
 	// default "*"
-	NIC string `json:"nic,omitempty"`
+	NIC string `json:"nic,omitempty" yaml:"nic,omitempty"`
 	// IncludeIP indicates the host IP that the edge gateway needs to listen to.
 	// empty or "*" stands for all ips. You can also specify ips such as "192.168.1.56,10.3.2.1"
 	// default "*"
-	IncludeIP string `json:"includeIP,omitempty"`
+	IncludeIP string `json:"includeIP,omitempty" yaml:"includeIP,omitempty"`
 	// ExcludeIP indicates the IP address that the edge gateway does not want to listen to.
 	// empty or "*" stands for not exclude any ip. You can also specify ips such as "192.168.1.56,10.3.2.1"
 	// default "*"
-	ExcludeIP string `json:"excludeIP,omitempty"`
+	ExcludeIP string `json:"excludeIP,omitempty" yaml:"excludeIP,omitempty"`
 	//// GoChassisConfig defines some configurations related to go-chassis
 	//// +Required
 	//GoChassisConfig *GoChassisConfig `json:"goChassisConfig,omitempty"`
 	// LoadBalancer indicates the load balance strategy
-	LoadBalancer *LoadBalancer `json:"loadBalancer,omitempty"`
+	LoadBalancer *LoadBalancer `json:"loadBalancer,omitempty" yaml:"loadBalancer,omitempty"`
 }
 
 // LoadBalancer indicates the loadbalance strategy in edgemesh
@@ -202,7 +202,7 @@ type LoadBalancer struct {
 	// do not allow users to configure manually
 	NodeName string
 	// ConsistentHash indicates the extension of the go-chassis loadbalancer
-	ConsistentHash *ConsistentHash `json:"consistentHash,omitempty"`
+	ConsistentHash *ConsistentHash `json:"consistentHash,omitempty" yaml:"consistentHash,omitempty"`
 }
 
 // ConsistentHash strategy is an extension of the go-chassis loadbalancer
@@ -211,20 +211,20 @@ type LoadBalancer struct {
 type ConsistentHash struct {
 	// PartitionCount indicates the hash ring partition count
 	// default 100
-	PartitionCount int `json:"partitionCount,omitempty"`
+	PartitionCount int `json:"partitionCount,omitempty" yaml:"partitionCount,omitempty"`
 	// ReplicationFactor indicates the hash ring replication factor
 	// default 10
-	ReplicationFactor int `json:"replicationFactor,omitempty"`
+	ReplicationFactor int `json:"replicationFactor,omitempty" yaml:"replicationFactor,omitempty"`
 	// Load indicates the hash ring bounded loads
 	// default 1.25
-	Load float64 `json:"load,omitempty"`
+	Load float64 `json:"load,omitempty" yaml:"load,omitempty"`
 }
 
 type EdgeTunnelConfig struct {
 	// Enable indicates whether EdgeTunnel is enabled,
 	// if set to false (for debugging etc.), skip checking other EdgeTunnel configs.
 	// default false
-	Enable bool `json:"enable,omitempty"`
+	Enable bool `json:"enable,omitempty" yaml:"enable,omitempty"`
 	// Mode indicates EdgeTunnel running mode
 	// do not allow users to configure manually
 	// options: ServerAndClient, ClientOnly
@@ -234,63 +234,63 @@ type EdgeTunnelConfig struct {
 	NodeName string
 	// ListenPort indicates the listen port of EdgeTunnel
 	// default 20006
-	ListenPort int `json:"listenPort,omitempty"`
+	ListenPort int `json:"listenPort,omitempty" yaml:"listenPort,omitempty"`
 	// Transport indicates the transport protocol used by the p2p tunnel
 	// default tcp
-	Transport string `json:"transport,omitempty"`
+	Transport string `json:"transport,omitempty" yaml:"transport,omitempty"`
 	// Rendezvous unique string to identify group of libp2p nodes
 	// default EDGEMESH_PLAYGOUND
-	Rendezvous string `json:"rendezvous,omitempty"`
+	Rendezvous string `json:"rendezvous,omitempty" yaml:"rendezvous,omitempty"`
 	// RelayNodes indicates some nodes that can become libp2p relay nodes
-	RelayNodes []*RelayNode `json:"relayNodes,omitempty"`
+	RelayNodes []*RelayNode `json:"relayNodes,omitempty" yaml:"relayNodes,omitempty"`
 	// EnableIpfsLog open ipfs log info
 	// default false
-	EnableIpfsLog bool `json:"enableIpfsLog,omitempty"`
+	EnableIpfsLog bool `json:"enableIpfsLog,omitempty" yaml:"enableIpfsLog,omitempty"`
 	// MaxCandidates sets the number of relay candidates that we buffer.
 	// default 5
-	MaxCandidates int `json:"maxCandidates,omitempty"`
+	MaxCandidates int `json:"maxCandidates,omitempty" yaml:"maxCandidates,omitempty"`
 	// HeartbeatPeriod indicates the heartbeat period to keep connected with the relay peers (unit second)
 	// default 120
-	HeartbeatPeriod int `json:"heartbeatPeriod,omitempty"`
+	HeartbeatPeriod int `json:"heartbeatPeriod,omitempty" yaml:"heartbeatPeriod,omitempty"`
 	// FinderPeriod indicates the execution period of the relay finder (unit second)
 	// default 60
-	FinderPeriod int `json:"finderPeriod,omitempty"`
+	FinderPeriod int `json:"finderPeriod,omitempty" yaml:"finderPeriod,omitempty"`
 	// PSK configures libp2p to use the given private network protector.
-	PSK *PSK `json:"psk,omitempty"`
+	PSK *PSK `json:"psk,omitempty" yaml:"psk,omitempty"`
 	// TunnelLimitConfig configures tunnel stream limit
-	TunnelLimitConfig *TunnelLimitConfig `json:"tunnelLimitConfig,omitempty"`
+	TunnelLimitConfig *TunnelLimitConfig `json:"tunnelLimitConfig,omitempty" yaml:"tunnelLimitConfig,omitempty"`
 }
 
 type RelayNode struct {
 	// NodeName indicates the relay node name, which is the same as the node name of Kubernetes
-	NodeName string `json:"nodeName,omitempty"`
+	NodeName string `json:"nodeName,omitempty" yaml:"nodeName,omitempty"`
 	// AdvertiseAddress sets the IP address for the relay node to advertise
-	AdvertiseAddress []string `json:"advertiseAddress,omitempty"`
+	AdvertiseAddress []string `json:"advertiseAddress,omitempty" yaml:"advertiseAddress,omitempty"`
 }
 
 type PSK struct {
 	// Enable indicates whether libp2p pnet is enabled.
 	// default true
-	Enable bool `json:"enable,omitempty"`
+	Enable bool `json:"enable,omitempty" yaml:"enable,omitempty"`
 	// Path indicates the psk file path.
 	// default /etc/edgemesh/psk
-	Path string `json:"path,omitempty"`
+	Path string `json:"path,omitempty" yaml:"path,omitempty"`
 }
 
 type TunnelLimitConfig struct {
 	// Enable indicates whether libp2p ResourceLimit is enabled,
 	// defaults true
-	Enable bool `json:"enable,omitempty"`
+	Enable bool `json:"enable,omitempty" yaml:"enable,omitempty"`
 	// Tunnel Proxy all Stream InBound count
 	// default:10240
-	TunnelBaseStreamIn int `json:"tunnelBaseStreamIn,omitempty"`
+	TunnelBaseStreamIn int `json:"tunnelBaseStreamIn,omitempty" yaml:"tunnelBaseStreamIn,omitempty"`
 	// Tunnel Proxy all Stream OutBound count
 	// default:10240
-	TunnelBaseStreamOut int `json:"tunnelBaseStreamOut,omitempty"`
+	TunnelBaseStreamOut int `json:"tunnelBaseStreamOut,omitempty" yaml:"tunnelBaseStreamOut,omitempty"`
 	// Tunnel Proxy each Peer Stream InBound count
 	// default:1024
-	TunnelPeerBaseStreamIn int `json:"tunnelPeerBaseStreamIn,omitempty"`
+	TunnelPeerBaseStreamIn int `json:"tunnelPeerBaseStreamIn,omitempty" yaml:"tunnelPeerBaseStreamIn,omitempty"`
 	// Tunnel Proxy each Peer Stream OutBound count
 	// default:1024
-	TunnelPeerBaseStreamOut int `json:"tunnelPeerBaseStreamOut,omitempty"`
+	TunnelPeerBaseStreamOut int `json:"tunnelPeerBaseStreamOut,omitempty" yaml:"tunnelPeerBaseStreamOut,omitempty"`
 }
