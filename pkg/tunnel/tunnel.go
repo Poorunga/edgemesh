@@ -3,10 +3,12 @@ package tunnel
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"sync"
 	"time"
 
+	"github.com/fsnotify/fsnotify"
 	ds "github.com/ipfs/go-datastore"
 	dsync "github.com/ipfs/go-datastore/sync"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
@@ -23,8 +25,10 @@ import (
 	manet "github.com/multiformats/go-multiaddr/net"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog/v2"
+	"sigs.k8s.io/yaml"
 
 	"github.com/kubeedge/edgemesh/pkg/apis/config/defaults"
+	"github.com/kubeedge/edgemesh/pkg/apis/config/v1alpha1"
 	discoverypb "github.com/kubeedge/edgemesh/pkg/tunnel/pb/discovery"
 	proxypb "github.com/kubeedge/edgemesh/pkg/tunnel/pb/proxy"
 	netutil "github.com/kubeedge/edgemesh/pkg/util/net"
@@ -484,6 +488,9 @@ func (t *EdgeTunnel) runRelayFinder(ddht *dual.DHT, peerSource chan peer.AddrInf
 	err := wait.PollUntil(period, func() (done bool, err error) {
 		// ensure peers in same LAN can send [hop]RESERVE to the relay
 		for _, relay := range t.relayMap {
+			if relay.ID == t.p2pHost.ID() {
+				continue
+			}
 			select {
 			case peerSource <- *relay:
 				klog.Infoln("[Finder] send relayMap peer:", relay)
@@ -541,7 +548,7 @@ func (t *EdgeTunnel) refreshRelayMap(nodeName string, dhtPeer *peer.AddrInfo) {
 
 func (t *EdgeTunnel) runHeartbeat() {
 	err := wait.PollUntil(time.Duration(t.Config.HeartbeatPeriod)*time.Second, func() (done bool, err error) {
-		t.connectToRelays()
+		t.connectToRelays("Heartbeat")
 		// We make the return value of ConditionFunc, such as bool to return false,
 		// and err to return to nil, to ensure that we can continuously execute
 		// the ConditionFunc.
@@ -552,19 +559,19 @@ func (t *EdgeTunnel) runHeartbeat() {
 	}
 }
 
-func (t *EdgeTunnel) connectToRelays() {
+func (t *EdgeTunnel) connectToRelays(connectType string) {
 	wg := sync.WaitGroup{}
 	for _, relay := range t.relayMap {
 		wg.Add(1)
 		go func(relay *peer.AddrInfo) {
 			defer wg.Done()
-			t.connectToRelay(relay)
+			t.connectToRelay(connectType, relay)
 		}(relay)
 	}
 	wg.Wait()
 }
 
-func (t *EdgeTunnel) connectToRelay(relay *peer.AddrInfo) {
+func (t *EdgeTunnel) connectToRelay(connectType string, relay *peer.AddrInfo) {
 	if t.p2pHost.ID() == relay.ID {
 		return
 	}
@@ -572,24 +579,93 @@ func (t *EdgeTunnel) connectToRelay(relay *peer.AddrInfo) {
 		return
 	}
 
-	klog.V(0).Infof("[Heartbeat] Connection between relay %s is not established, try connect", relay)
+	klog.V(0).Infof("[%s] Connection between relay %s is not established, try connect", connectType, relay)
 	retryTime := 0
 	for retryTime < RetryTime {
 		err := t.p2pHost.Connect(t.hostCtx, *relay)
 		if err != nil {
-			klog.Errorf("[Heartbeat] Failed to connect relay %s err: %v", relay, err)
+			klog.Errorf("[%s] Failed to connect relay %s err: %v", connectType, relay, err)
 			time.Sleep(RetryInterval)
 			retryTime++
 			continue
 		}
 
-		klog.Infof("[Heartbeat] Success connected to relay %s", relay)
+		klog.Infof("[%s] Success connected to relay %s", connectType, relay)
 		break
 	}
+}
+
+func (t *EdgeTunnel) runConfigWatcher() {
+	defer func() {
+		if err := t.cfgWatcher.Close(); err != nil {
+			klog.Errorf("[Watcher] Failed to close config watcher")
+		}
+	}()
+
+	for {
+		select {
+		case event, ok := <-t.cfgWatcher.Events:
+			if !ok {
+				klog.Errorf("[Watcher] Failed to get events chan")
+				continue
+			}
+			// k8s configmaps uses symlinks, we need this workaround.
+			// updating k8s configmaps will delete the file inotify
+			if event.Op == fsnotify.Remove {
+				// re-add a new watcher pointing to the new symlink/file
+				if err := t.cfgWatcher.Add(t.Config.ConfigPath); err != nil {
+					klog.Errorf("[Watcher] Failed to re-add watcher in %s, err: %v", t.Config.ConfigPath, err)
+					return
+				}
+				t.doReload(t.Config.ConfigPath)
+			}
+			// also allow normal files to be modified and reloaded.
+			if event.Op&fsnotify.Write == fsnotify.Write {
+				t.doReload(t.Config.ConfigPath)
+			}
+		case err, ok := <-t.cfgWatcher.Errors:
+			if !ok {
+				klog.Errorf("[Watcher] Failed to get errors chan")
+				continue
+			}
+			klog.Errorf("[Watcher] Config watcher got an error:", err)
+		}
+	}
+}
+
+type reloadConfig struct {
+	Modules *struct {
+		EdgeTunnelConfig *v1alpha1.EdgeTunnelConfig `json:"edgeTunnel,omitempty"`
+	} `json:"modules,omitempty"`
+}
+
+func (t *EdgeTunnel) doReload(configPath string) {
+	klog.Infof("[Watcher] Reload config from %s", configPath)
+
+	var cfg reloadConfig
+	data, err := ioutil.ReadFile(configPath)
+	if err != nil {
+		klog.Errorf("[Watcher] Failed to read config file %s: %v", configPath, err)
+		return
+	}
+	err = yaml.Unmarshal(data, &cfg)
+	if err != nil {
+		klog.Errorf("[Watcher] Failed to unmarshal config file %s: %v", configPath, err)
+		return
+	}
+
+	klog.Infof("[Watcher] Generate new relay map:")
+	relayMap := GenerateRelayMap(cfg.Modules.EdgeTunnelConfig.RelayNodes, t.Config.Transport, t.Config.ListenPort)
+	for nodeName, pi := range relayMap {
+		klog.Infof("%s=>%s", nodeName, pi)
+	}
+	t.relayMap = relayMap
+	t.connectToRelays("Watcher")
 }
 
 func (t *EdgeTunnel) Run() {
 	go t.runMdnsDiscovery()
 	go t.runDhtDiscovery()
+	go t.runConfigWatcher()
 	t.runHeartbeat()
 }
